@@ -16,3 +16,34 @@ pub struct InGameCamera;
 /// Camera that renders the [`Canvas`] (and other graphics on [`HIGH_RES_LAYERS`]) to the screen.
 #[derive(Component)]
 pub struct OuterCamera;
+
+#[derive(Component)]
+#[derive(Debug)]
+pub struct GameControls {
+    pub left  : KeyCode,
+    pub right : KeyCode,
+    pub up    : KeyCode,
+    pub down  : KeyCode,
+    pub shoot : KeyCode,
+    pub rocket: KeyCode,
+    pub pause : KeyCode,
+
+    pub ui_confirm: KeyCode,
+    pub ui_deny   : KeyCode,
+}
+impl Default for GameControls {
+    fn default() -> GameControls {
+        GameControls {
+            left  : KeyCode::ArrowLeft,
+            right : KeyCode::ArrowRight,
+            up    : KeyCode::ArrowUp,
+            down  : KeyCode::ArrowDown,
+            shoot : KeyCode::KeyZ,
+            rocket: KeyCode::KeyX,
+            pause : KeyCode::Escape,
+        
+            ui_confirm: KeyCode::KeyZ,
+            ui_deny   : KeyCode::KeyX,
+        }
+    }
+}

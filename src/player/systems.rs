@@ -17,6 +17,7 @@ pub const PIXEL_PERFECT_RENDERING  : RenderLayers = RenderLayers::layer(0);
 pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
 
 use crate::components::Rotation;
+use crate::components::GameControls;
 
 use super::components::Player;
 
@@ -43,32 +44,40 @@ pub fn spawn_player(
         },
         Rotation,
         Player{is_active: false},
+        GameControls{
+            ..Default::default()
+        },
         PIXEL_PERFECT_RENDERING,
     ));
 }
 
 pub fn run_player_logic(
     mut player_transform_query: Query<& mut Transform, With<Player>>,
-    keyboard_input: Res<ButtonInput<KeyCode>>
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    game_keys: Query<& mut GameControls, With<Player>>
 ) {
     if let Ok(mut player_transform) = player_transform_query.get_single_mut() {
-        let mut rotation  = player_transform.rotation.x;
-        let mut transform = player_transform.translation;
-        let mut scale     = player_transform.scale;
+        if let Ok(game_key_list) = game_keys.get_single() {
 
-        let mut movement_direction: Vec2 = Vec2::ZERO;
+            let mut rotation  = player_transform.rotation.x;
+            let mut transform = player_transform.translation;
+            let mut scale     = player_transform.scale;
 
-        if keyboard_input.pressed(KeyCode::Up  ) {
-            movement_direction.y -= 1.0
-        }
-        if keyboard_input.pressed(KeyCode::Down) {
-            movement_direction.y += 1.0
-        }
-        if keyboard_input.pressed(KeyCode::Left) {
-            movement_direction.x -= 1.0
-        }
-        if keyboard_input.pressed(KeyCode::Right) {
-            movement_direction.x += 1.0
+            let mut movement_direction: Vec2 = Vec2::ZERO;
+
+            if keyboard_input.pressed(game_key_list.up  ) {
+                movement_direction.y -= 1.0
+            }
+            if keyboard_input.pressed(game_key_list.down) {
+                movement_direction.y += 1.0
+            }
+            if keyboard_input.pressed(game_key_list.left) {
+                movement_direction.x -= 1.0
+            }
+            if keyboard_input.pressed(game_key_list.right) {
+                movement_direction.x += 1.0
+            }
+
         }
     }
 }

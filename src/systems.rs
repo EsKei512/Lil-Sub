@@ -22,6 +22,7 @@ pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
 use super::components::InGameCamera;
 use super::components::Canvas;
 use super::components::OuterCamera;
+use super::components::GameControls;
 
 pub fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     let canvas_size = Extent3d {
