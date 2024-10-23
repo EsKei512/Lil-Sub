@@ -4,3 +4,6 @@ use bevy::prelude::*;
 pub struct Player {
     pub is_active: bool,
 }
+
+#[derive(Component)]
+pub struct PlayerChild;
