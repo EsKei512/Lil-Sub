@@ -1,23 +1,14 @@
 use bevy::{
-    prelude::*,
-    render::{
+    ecs::query, prelude::*, render::{
         camera::RenderTarget,
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
         view::RenderLayers,
-    },
-    sprite::MaterialMesh2dBundle,
-    window::WindowResized,
+    }, sprite::MaterialMesh2dBundle, window::WindowResized
 };
 
-// Game Resolution
-pub const GAME_RES_X: u32 = 320;
-pub const GAME_RES_Y: u32 = 240;
-
-// Layers for rendering. 
-pub const PIXEL_PERFECT_RENDERING  : RenderLayers = RenderLayers::layer(0);
-pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
+use super::resources::*;
 
 use super::components::InGameCamera;
 use super::components::Canvas;
@@ -81,4 +72,16 @@ pub fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // the "outer" camera renders whatever is on `HIGH_RES_LAYERS` to the screen.
     // here, the canvas and one of the sample sprites will be rendered by this camera
     commands.spawn((Camera2dBundle::default(), OuterCamera, PIXEL_IMPERFECT_RENDERING));
+}
+
+pub fn fit_canvas(
+    mut resize_events: EventReader<WindowResized>,
+    mut projections: Query<&mut OrthographicProjection, With<OuterCamera>>,
+) {
+    for event in resize_events.read() {
+        let h_scale = event.width  / GAME_RES_X as f32;
+        let v_scale = event.height / GAME_RES_Y as f32;
+        let mut projection = projections.single_mut();
+        projection.scale = 1. / h_scale.min(v_scale).round();
+    }
 }

@@ -8,13 +8,7 @@ use bevy::{
     }, sprite::MaterialMesh2dBundle, window::WindowResized
 };
 
-// Game Resolution
-pub const GAME_RES_X: u32 = 320;
-pub const GAME_RES_Y: u32 = 240;
-
-// Layers for rendering. 
-pub const PIXEL_PERFECT_RENDERING  : RenderLayers = RenderLayers::layer(0);
-pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
+use crate::resources::*;
 
 use crate::components::Rotation;
 use crate::components::GameControls;
@@ -30,12 +24,12 @@ pub fn spawn_player(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let texture = asset_server.load("sprites/gameplay/player.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(24), 6, 1, None, None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(22), 6, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     commands.spawn( (
         SpriteBundle {
-            transform: Transform::from_xyz((GAME_RES_X / 4) as f32, (GAME_RES_Y / 2) as f32, 5.0),
+            transform: Transform::from_xyz(0.0, 0.0, 5.0),
             texture,
             ..default()
         },
@@ -49,12 +43,11 @@ pub fn spawn_player(
             ..Default::default()
         },
         Complex2dMovement {
-            global_transform: Vec2::new((GAME_RES_X / 4) as f32, (GAME_RES_Y / 2) as f32),
-            soft_terminal_velocity: 1.5,
-            hard_terminal_velocity: 3.0,
-            acceleration: 4.5,
-            natural_deceleration: 8.65,
-            current_velocity: Vec2::ZERO,
+            soft_terminal_velocity: 0.6,
+            hard_terminal_velocity: 1.2,
+            acceleration: 4.2,
+            natural_deceleration: 6.25,
+            current_velocity: Vec3::ZERO,
         },
         PIXEL_PERFECT_RENDERING,
     ));
@@ -73,17 +66,17 @@ pub fn run_player_logic(
     {
     if let Ok(mut pv) = velocity_info.get_single_mut() { // "pv" = Player Velocity
 
-        let mut rotation  = player_transform.rotation.x;
+        let mut rotation  = player_transform.rotation.y;
         let mut transform = player_transform.translation;
         let mut scale     = player_transform.scale;
 
         let mut movement_direction: Vec2 = Vec2::ZERO;
 
         if keyboard_input.pressed(game_key_list.up  ) {
-            movement_direction.y -= 1.0
+            movement_direction.y += 1.0
         }
         if keyboard_input.pressed(game_key_list.down) {
-            movement_direction.y += 1.0
+            movement_direction.y -= 1.0
         }
         if keyboard_input.pressed(game_key_list.left) {
             movement_direction.x -= 1.0
@@ -92,21 +85,26 @@ pub fn run_player_logic(
             movement_direction.x += 1.0
         }
 
-        if ((movement_direction.x.abs() * 10.0).round() > 0.0) || ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex
+        if ((movement_direction.x.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex
             pv.current_velocity.x = (pv.current_velocity.x + ((movement_direction.x * &pv.acceleration) * time.delta_seconds()) ).clamp(-pv.soft_terminal_velocity, pv.soft_terminal_velocity);
-            pv.current_velocity.y = (pv.current_velocity.y + ((movement_direction.y * &pv.acceleration) * time.delta_seconds()) ).clamp(-pv.soft_terminal_velocity, pv.soft_terminal_velocity);    
-            println!("{}", pv.current_velocity);
         }
         else {
-
-            //let x_sign: i8 = if &pv.current_velocity.x >= &0.0 {1} else {-1};
-            //let y_sign: i8 = if &pv.current_velocity.y >= &0.0 {1} else {-1};
-            
-
+            let x_sign: i8 = if &pv.current_velocity.x >= &0.0 {1} else {-1};
+            pv.current_velocity.x = (pv.current_velocity.x.abs() - (&pv.natural_deceleration * time.delta_seconds())).clamp(0.0, pv.soft_terminal_velocity) * (x_sign as f32); 
         }
         
-        
-        //println!("{}", pv.current_velocity);
+        if ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex
+            pv.current_velocity.y = (pv.current_velocity.y + ((movement_direction.y * &pv.acceleration) * time.delta_seconds()) ).clamp(-pv.soft_terminal_velocity, pv.soft_terminal_velocity);    
+            //player_transform.rotate_z((movement_direction.y * 2.5)  * time.delta_seconds());
+            //player_transform.rotation.z = player_transform.rotation.z.clamp(-0.4, 0.4);
+        }
+        else {
+            let y_sign: i8 = if &pv.current_velocity.y >= &0.0 {1} else {-1};
+            pv.current_velocity.y = (pv.current_velocity.y.abs() - (&pv.natural_deceleration * time.delta_seconds())).clamp(0.0, pv.soft_terminal_velocity) * (y_sign as f32);
+            //player_transform.rotation.z = player_transform.rotation.z.lerp(0.0, 0.05);
+        }
+               
+        player_transform.translation += pv.current_velocity;
 
         }
     }
