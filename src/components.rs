@@ -47,3 +47,17 @@ impl Default for GameControls {
         }
     }
 }
+
+#[derive(Component)]
+pub struct Complex2dMovement {
+    pub global_transform : Vec2,
+
+    pub soft_terminal_velocity : f32, // The entity with this cannot NATURALLY go faster than this, but can be pushed to go faster (I.e., with an explosion)
+    pub hard_terminal_velocity : f32, // The entity with this component CANNOT go faster than this
+
+    pub acceleration : f32,
+    pub natural_deceleration : f32,
+    
+    pub current_velocity : Vec2, // The natural deceleration
+
+}
