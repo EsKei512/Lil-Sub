@@ -9,12 +9,10 @@ use bevy::{
 };
 
 use crate::resources::*;
-
-use crate::components::Rotation;
-use crate::components::GameControls;
-use crate::components::Complex2dMovement;
+use crate::components::*;
 
 use super::components::*;
+use super::resources::*;
 
 pub fn spawn_player(
     mut commands: Commands, 
@@ -42,9 +40,9 @@ pub fn spawn_player(
             ..Default::default()
         },
         Complex2dMovement {
-            soft_terminal_velocity: 0.6,
-            hard_terminal_velocity: 1.2,
-            acceleration: 4.2,
+            soft_terminal_velocity: 0.75,
+            hard_terminal_velocity: 1.6,
+            acceleration: 4.0,
             natural_deceleration: 6.25,
             current_velocity: Vec3::ZERO,
         },
@@ -60,6 +58,9 @@ pub fn spawn_player(
             layout: texture_atlas_layout,
             index: 2,
         },
+        AnimationTools {
+            ticks: PLAYER_PROPELLER_TICK_LENGTH,
+        },
         PIXEL_PERFECT_RENDERING,
         PlayerChild,
     )).id();
@@ -67,17 +68,21 @@ pub fn spawn_player(
 }
 
 pub fn run_player_logic(
-    mut player_query: Query<(&Children, &mut Transform, &mut TextureAtlas, & GameControls, &mut Complex2dMovement), (With<Player>, Without<PlayerChild>)>,
+    mut player_query: Query<(&Children, &mut Transform, &mut TextureAtlas, & GameControls, &mut Complex2dMovement, &mut AnimationTools), (With<Player>, Without<PlayerChild>)>,
     mut child_query : Query<(&Parent  , &mut Transform, &mut TextureAtlas, ), (With<PlayerChild>, Without<Player>)>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
     for (player, mut eyes_texture, mut eyes_transform) in child_query.iter_mut() 
     {
-    for (eyes, mut p_transform, mut p_texture, g_buttons, mut p_physics) in player_query.iter_mut()
+    for (eyes, mut p_transform, mut p_texture, g_buttons, mut p_physics, mut a_tools) in player_query.iter_mut()
     {
+
+        // PLAYER MOVEMENT CODE **************************************************************************************************************
+
         let mut movement_direction: Vec2 = Vec2::ZERO;
 
+        // Capture player key inputs
         if keyboard_input.pressed(g_buttons.up  ) {
             movement_direction.y += 1.0
         }
@@ -91,26 +96,42 @@ pub fn run_player_logic(
             movement_direction.x += 1.0
         }
 
+        // Horizontal movement
         if ((movement_direction.x.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex
             p_physics.current_velocity.x = (p_physics.current_velocity.x + ((movement_direction.x * &p_physics.acceleration) * time.delta_seconds()) ).clamp(-p_physics.soft_terminal_velocity, p_physics.soft_terminal_velocity);
         }
-        else {
+        else { // Horizontal deceleration
             let x_sign: i8 = if &p_physics.current_velocity.x >= &0.0 {1} else {-1};
             p_physics.current_velocity.x = (p_physics.current_velocity.x.abs() - (&p_physics.natural_deceleration * time.delta_seconds())).clamp(0.0, p_physics.soft_terminal_velocity) * (x_sign as f32); 
         }
         
-        if ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex
+        // Vertical movement
+        if ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex too
             p_physics.current_velocity.y = (p_physics.current_velocity.y + ((movement_direction.y * &p_physics.acceleration) * time.delta_seconds()) ).clamp(-p_physics.soft_terminal_velocity, p_physics.soft_terminal_velocity);    
-            //player_transform.rotate_z((movement_direction.y * 2.5)  * time.delta_seconds());
-            //player_transform.rotation.z = player_transform.rotation.z.clamp(-0.4, 0.4);
         }
-        else {
+        else { // Vertical deceleration
             let y_sign: i8 = if &p_physics.current_velocity.y >= &0.0 {1} else {-1};
             p_physics.current_velocity.y = (p_physics.current_velocity.y.abs() - (&p_physics.natural_deceleration * time.delta_seconds())).clamp(0.0, p_physics.soft_terminal_velocity) * (y_sign as f32);
-            //player_transform.rotation.z = player_transform.rotation.z.lerp(0.0, 0.05);
         }
-               
-        p_transform.translation += p_physics.current_velocity;
+
+        let mut normalized_vector : Vec2 = Vec2::new(p_physics.current_velocity.x, p_physics.current_velocity.y);
+
+        if normalized_vector.x.is_nan() { normalized_vector.x = 0.0 }
+        if normalized_vector.y.is_nan() { normalized_vector.y = 0.0 }
+
+        p_transform.translation += p_physics.current_velocity.abs() * Vec3::new(normalized_vector.x, normalized_vector.y, 1.0); // Actually move the player
+
+        // END OF PLAYER MOVEMENT CODE *******************************************************************************************************
+
+        // PLAYER ANIMATION CODE *************************************************************************************************************
+
+        //if a_tools.ticks <= 0.0 {
+            //if p_texture.index == 0 { p_texture.index = 1 }
+            //else if p_texture.index == 1 { p_texture.index = 0 }
+            //a_tools.ticks = PLAYER_PROPELLER_TICK_LENGTH;
+        //}
+        //else { a_tools.tick(time.delta_seconds()) }
+        // END OF PLAYER ANIMATION CODE ******************************************************************************************************
 
     }
     }

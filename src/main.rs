@@ -22,11 +22,21 @@ pub mod player;
 use player::PlayerPlugin;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins(PlayerPlugin)
-        .add_systems(Startup, setup_camera)
-        .add_systems(Update, fit_canvas)
+    App::new()                                // Plugins
+        .add_plugins((                             
+            DefaultPlugins.set(ImagePlugin::default_nearest()),
+            PlayerPlugin
+        ))
+
         .insert_resource(Msaa::Off)
+
+        .add_systems(Startup, ( // Startup Systems
+            setup_camera,
+        ))
+
+        .add_systems(Update, (  // Update systems
+            fit_canvas,
+        ))
+        
         .run();
 }

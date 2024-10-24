@@ -59,3 +59,20 @@ pub struct Complex2dMovement {
     pub current_velocity : Vec3, // The natural deceleration
 
 }
+
+#[derive(Component)]
+pub struct AnimationTools {
+    pub ticks : f32,
+}
+impl AnimationTools {
+    pub fn tick(&mut self, delta_time: f32) {
+        self.ticks -= delta_time * 60.0;
+    }
+}
+impl Default for AnimationTools {
+    fn default() -> AnimationTools {
+        AnimationTools {
+            ticks: 0.0,
+        }
+    }
+}
