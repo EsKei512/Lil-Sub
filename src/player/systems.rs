@@ -39,6 +39,9 @@ pub fn spawn_player(
         GameControls{
             ..Default::default()
         },
+        AnimationTools {
+            ticks: PLAYER_PROPELLER_TICK_LENGTH,
+        },
         Complex2dMovement {
             soft_terminal_velocity: 0.75,
             hard_terminal_velocity: 1.6,
@@ -58,9 +61,6 @@ pub fn spawn_player(
             layout: texture_atlas_layout,
             index: 2,
         },
-        AnimationTools {
-            ticks: PLAYER_PROPELLER_TICK_LENGTH,
-        },
         PIXEL_PERFECT_RENDERING,
         PlayerChild,
     )).id();
@@ -68,19 +68,21 @@ pub fn spawn_player(
 }
 
 pub fn run_player_logic(
-    mut player_query: Query<(&Children, &mut Transform, &mut TextureAtlas, & GameControls, &mut Complex2dMovement, &mut AnimationTools), (With<Player>, Without<PlayerChild>)>,
+    mut player_query: Query<(&Children, &mut Transform, &mut TextureAtlas, & GameControls, &mut Complex2dMovement, &mut AnimationTools, ), (With<Player>, Without<PlayerChild>)>,
     mut child_query : Query<(&Parent  , &mut Transform, &mut TextureAtlas, ), (With<PlayerChild>, Without<Player>)>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    for (player, mut eyes_texture, mut eyes_transform) in child_query.iter_mut() 
+    for (player, mut eyes_transform , mut eyes_texture) in child_query.iter_mut() 
     {
     for (eyes, mut p_transform, mut p_texture, g_buttons, mut p_physics, mut a_tools) in player_query.iter_mut()
     {
-
+        
         // PLAYER MOVEMENT CODE **************************************************************************************************************
 
         let mut movement_direction: Vec2 = Vec2::ZERO;
+
+        let current_sprite_rotation : f32 = p_transform.rotation.z.clone();
 
         // Capture player key inputs
         if keyboard_input.pressed(g_buttons.up  ) {
@@ -105,14 +107,27 @@ pub fn run_player_logic(
             p_physics.current_velocity.x = (p_physics.current_velocity.x.abs() - (&p_physics.natural_deceleration * time.delta_seconds())).clamp(0.0, p_physics.soft_terminal_velocity) * (x_sign as f32); 
         }
         
+        let y_sign: i8 = if &p_physics.current_velocity.y >= &0.0 {1} else {-1};
+        
         // Vertical movement
         if ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex too
             p_physics.current_velocity.y = (p_physics.current_velocity.y + ((movement_direction.y * &p_physics.acceleration) * time.delta_seconds()) ).clamp(-p_physics.soft_terminal_velocity, p_physics.soft_terminal_velocity);    
+            if p_transform.rotation.z.abs() < 0.3 {
+                p_transform.rotate_z((0.01 * (y_sign as f32)) * (time.delta_seconds() * 60.0)); // TODO: Fix bug where player gets stuck in direction if he turns too far
+            }
         }
         else { // Vertical deceleration
-            let y_sign: i8 = if &p_physics.current_velocity.y >= &0.0 {1} else {-1};
             p_physics.current_velocity.y = (p_physics.current_velocity.y.abs() - (&p_physics.natural_deceleration * time.delta_seconds())).clamp(0.0, p_physics.soft_terminal_velocity) * (y_sign as f32);
+            if ! (-(current_sprite_rotation / 2.0)).is_nan() {
+                p_transform.rotate_z( -(current_sprite_rotation / 20.0) );
+            }
         }
+
+        if p_transform.rotation.z.is_nan() {
+            p_transform.rotation.z = 0.0;
+        }
+
+        println!("{}", current_sprite_rotation);
 
         let mut normalized_vector : Vec2 = Vec2::new(p_physics.current_velocity.x, p_physics.current_velocity.y);
 
@@ -125,12 +140,18 @@ pub fn run_player_logic(
 
         // PLAYER ANIMATION CODE *************************************************************************************************************
 
-        //if a_tools.ticks <= 0.0 {
-            //if p_texture.index == 0 { p_texture.index = 1 }
-            //else if p_texture.index == 1 { p_texture.index = 0 }
-            //a_tools.ticks = PLAYER_PROPELLER_TICK_LENGTH;
-        //}
-        //else { a_tools.tick(time.delta_seconds()) }
+        if a_tools.ticks <= 0.0 {
+            if p_texture.index == 0 { p_texture.index = 1 }
+            else if p_texture.index == 1 { p_texture.index = 0 }
+            a_tools.ticks = PLAYER_PROPELLER_TICK_LENGTH;
+        }
+        else { a_tools.tick(time.delta_seconds()) }
+
+        if      movement_direction.y > 0.0 { eyes_texture.index = 3 }
+        else if movement_direction.y < 0.0 { eyes_texture.index = 5 }
+        else if movement_direction.x < 0.0 { eyes_texture.index = 4 }
+        else { eyes_texture.index = 2 }
+        
         // END OF PLAYER ANIMATION CODE ******************************************************************************************************
 
     }

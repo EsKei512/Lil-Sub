@@ -1,9 +1,5 @@
 use bevy::prelude::*;
 
-// A component that allows sprites to rotate
-#[derive(Component)]
-pub struct Rotation;
-
 /// Low-resolution texture that contains the pixel-perfect world.
 /// Canvas itself is rendered to the high-resolution world.
 #[derive(Component)]
