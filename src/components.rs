@@ -72,3 +72,9 @@ impl Default for AnimationTools {
         }
     }
 }
+
+#[derive(Component)]
+pub struct Collision {
+    pub enabled: bool,
+    pub size   : Vec3,
+}

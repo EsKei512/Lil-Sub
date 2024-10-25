@@ -1,12 +1,6 @@
-use bevy::{
-    color::palettes::css::RED, input::keyboard::Key, math::VectorSpace, prelude::*, render::{
-        camera::RenderTarget,
-        render_resource::{
-            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-        },
-        view::RenderLayers,
-    }, sprite::MaterialMesh2dBundle, window::WindowResized
-};
+use bevy::math::VectorSpace;
+use bevy::prelude::*;
+use rand::Rng;
 
 use crate::resources::*;
 use crate::components::*;
@@ -18,8 +12,6 @@ pub fn spawn_player(
     mut commands: Commands, 
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let texture = asset_server.load("sprites/gameplay/player.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(22), 6, 1, None, None);
@@ -27,7 +19,7 @@ pub fn spawn_player(
 
     let player_entity = commands.spawn( (
         SpriteBundle {
-            transform: Transform::from_xyz(0.0, 0.0, 5.0),
+            transform: Transform::from_xyz(5.0, 0.0, 5.0),
             texture: texture.clone(),
             ..default()
         },
@@ -72,6 +64,9 @@ pub fn run_player_logic(
     mut child_query : Query<(&Parent  , &mut Transform, &mut TextureAtlas, ), (With<PlayerChild>, Without<Player>)>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     for (player, mut eyes_transform , mut eyes_texture) in child_query.iter_mut() 
     {
@@ -127,8 +122,6 @@ pub fn run_player_logic(
             p_transform.rotation.z = 0.0;
         }
 
-        println!("{}", current_sprite_rotation);
-
         let mut normalized_vector : Vec2 = Vec2::new(p_physics.current_velocity.x, p_physics.current_velocity.y);
 
         if normalized_vector.x.is_nan() { normalized_vector.x = 0.0 }
@@ -153,6 +146,90 @@ pub fn run_player_logic(
         else { eyes_texture.index = 2 }
         
         // END OF PLAYER ANIMATION CODE ******************************************************************************************************
+
+        // PLAYER SHOOTING CODE **************************************************************************************************************
+
+        if keyboard_input.just_pressed(g_buttons.shoot) {
+            commands.spawn( ( // Player bullet entity
+                SpriteBundle {
+                    transform : Transform::from_translation(p_transform.translation.clone()),
+                    texture : asset_server.load("sprites/gameplay/projectiles/player_bullet.png"),
+                    ..Default::default()
+                },
+                Complex2dMovement {
+                    soft_terminal_velocity: 5.0,
+                    hard_terminal_velocity: 5.0,
+                    acceleration: 0.1,
+                    natural_deceleration: 15.0,
+                    current_velocity: Vec3::new(5.0, 0.0, 0.0),
+                },
+                TextureAtlas {
+                    layout: texture_atlas_layouts.add(TextureAtlasLayout::from_grid(UVec2::splat(14), 6, 1, None, None)),
+                    index: 0,
+                },
+                Collision {
+                    enabled: true,
+                    size: Vec3::new(10.0, 6.0, 250.0),
+                },
+                PlayerBullet {
+                    float_horizontal_acceleration: rand::thread_rng().gen_range(-0.05..0.05),
+                },
+                AnimationTools {
+                    ticks: PLAYER_BULLET_TICK_LENGTH,
+                },
+            ));
+        }
+
+        // END OF PLAYER SHOOTING CODE *******************************************************************************************************
+
+    }
+    }
+}
+
+pub fn run_player_bullet_logic (
+    mut bullet_query: Query<(&mut Transform, &mut Complex2dMovement, &mut TextureAtlas, &mut Collision, & PlayerBullet, Entity, &mut AnimationTools), With<PlayerBullet>>,
+    mut commands: Commands,
+    time: Res<Time>,
+) {
+    for (mut b_transform, mut b_physics, mut b_texture, mut b_collision, bullet, entity, mut a_tools) in bullet_query.iter_mut() 
+    {
+    if b_collision.enabled { // Bullet shooting
+        
+        b_transform.translation += b_physics.current_velocity;
+
+        b_physics.current_velocity.x -= b_physics.natural_deceleration * time.delta_seconds();
+
+        if b_physics.current_velocity.x <= 0.005 { 
+
+            b_collision.enabled = false;
+            b_physics.current_velocity = Vec3::ZERO;
+
+        }
+
+    }
+    else { // Bullet as a little bubble
+        
+        b_transform.translation += b_physics.current_velocity; // Movement
+
+        b_physics.current_velocity.y += b_physics.acceleration * time.delta_seconds(); //              Floating away |
+        b_physics.current_velocity.x += bullet.float_horizontal_acceleration * time.delta_seconds();// Acceleration  |
+
+        if b_transform.translation.y >= 350.0 { // Despawn when off screen
+            commands.entity(entity).despawn();
+        }
+
+    }
+
+    if b_physics.current_velocity.x <= 0.1 {
+
+        if !(b_texture.index >= 5) // Animation
+        {
+            if a_tools.ticks <= 0.0 {
+                b_texture.index += 1;
+                a_tools.ticks = PLAYER_BULLET_TICK_LENGTH;
+            }
+            else { a_tools.tick(time.delta_seconds()); }
+        }
 
     }
     }

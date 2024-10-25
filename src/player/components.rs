@@ -7,3 +7,8 @@ pub struct Player {
 
 #[derive(Component)]
 pub struct PlayerChild;
+
+#[derive(Component)]
+pub struct PlayerBullet {
+    pub float_horizontal_acceleration : f32,
+}
