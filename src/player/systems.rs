@@ -19,7 +19,7 @@ pub fn spawn_player(
 
     let player_entity = commands.spawn( (
         SpriteBundle {
-            transform: Transform::from_xyz(5.0, 0.0, 5.0),
+            transform: Transform::from_xyz(-125.0, 0.0, 5.0),
             texture: texture.clone(),
             ..default()
         },
@@ -152,7 +152,7 @@ pub fn run_player_logic(
         if keyboard_input.just_pressed(g_buttons.shoot) {
             commands.spawn( ( // Player bullet entity
                 SpriteBundle {
-                    transform : Transform::from_translation(p_transform.translation.clone()),
+                    transform : Transform::from_xyz(p_transform.translation.x, p_transform.translation.y, 4.0),
                     texture : asset_server.load("sprites/gameplay/projectiles/player_bullet.png"),
                     ..Default::default()
                 },
@@ -160,8 +160,8 @@ pub fn run_player_logic(
                     soft_terminal_velocity: 5.0,
                     hard_terminal_velocity: 5.0,
                     acceleration: 0.1,
-                    natural_deceleration: 15.0,
-                    current_velocity: Vec3::new(5.0, 0.0, 0.0),
+                    natural_deceleration: 22.5,
+                    current_velocity: Vec3::new(14.0, 0.0, 0.0),
                 },
                 TextureAtlas {
                     layout: texture_atlas_layouts.add(TextureAtlasLayout::from_grid(UVec2::splat(14), 6, 1, None, None)),
@@ -195,7 +195,7 @@ pub fn run_player_bullet_logic (
     {
     if b_collision.enabled { // Bullet shooting
         
-        b_transform.translation += b_physics.current_velocity;
+        b_transform.translation += b_physics.current_velocity * (time.delta_seconds() * 60.0);
 
         b_physics.current_velocity.x -= b_physics.natural_deceleration * time.delta_seconds();
 
