@@ -20,17 +20,21 @@ use systems::*;
 
 pub mod player;
 use player::PlayerPlugin;
+pub mod enemy;
+use enemy::EnemyPlugin;
 
 fn main() {
     App::new()                                // Plugins
         .add_plugins((                             
             DefaultPlugins.set(ImagePlugin::default_nearest()),
-            PlayerPlugin
+            PlayerPlugin,
+            EnemyPlugin,
         ))
 
         .insert_resource(Msaa::Off)
 
         .add_systems(Startup, ( // Startup Systems
+            initialize_game,
             setup_camera,
         ))
 

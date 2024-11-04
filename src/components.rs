@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use super::resources::*;
 
 /// Low-resolution texture that contains the pixel-perfect world.
 /// Canvas itself is rendered to the high-resolution world.
@@ -58,17 +59,38 @@ pub struct Complex2dMovement {
 
 #[derive(Component)]
 pub struct AnimationTools {
-    pub ticks : f32,
+    pub ticks_i   : f32,
+    pub ticks_ii  : f32,
+    pub ticks_iii : f32,
+    pub ticks_iv  : f32,
+    pub generic_counter_i   : i32,
+    pub generic_counter_ii  : i32,
+    pub generic_counter_iii : i32,
+    pub generic_counter_iv  : i32,
+    pub generic_counter_v   : i32,
+    pub generic_counter_vi  : i32,
 }
 impl AnimationTools {
     pub fn tick(&mut self, delta_time: f32) {
-        self.ticks -= delta_time * 60.0;
+        self.ticks_i   -= delta_time * 60.0;
+        self.ticks_ii  -= delta_time * 60.0;
+        self.ticks_iii -= delta_time * 60.0;
+        self.ticks_iv  -= delta_time * 60.0;
     }
 }
 impl Default for AnimationTools {
     fn default() -> AnimationTools {
         AnimationTools {
-            ticks: 0.0,
+            ticks_i   : 0.0,
+            ticks_ii  : 0.0,
+            ticks_iii : 0.0,
+            ticks_iv  : 0.0,
+            generic_counter_i   : 0,
+            generic_counter_ii  : 0,
+            generic_counter_iii : 0,
+            generic_counter_iv  : 0,
+            generic_counter_v   : 0,
+            generic_counter_vi  : 0,
         }
     }
 }
@@ -78,3 +100,33 @@ pub struct Collision {
     pub enabled: bool,
     pub size   : Vec3,
 }
+
+#[derive(Component)]
+pub struct Stats {
+    pub max_hp : i32,
+    pub cur_hp : i32,
+
+    pub damage : i32,
+}
+
+
+#[derive(Component)]
+pub struct Player {
+    pub is_active: bool,
+}
+
+#[derive(Component)]
+pub struct PlayerChild;
+
+#[derive(Component)]
+pub struct PlayerBullet {
+    pub float_horizontal_acceleration : f32,
+}
+
+#[derive(Component)]
+pub struct EnemySpawningQueue {
+    pub queue: Vec<EnemySpawningInfo>,
+}
+
+#[derive(Component)]
+pub struct GlobalEnt;

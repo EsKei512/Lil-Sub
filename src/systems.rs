@@ -10,10 +10,7 @@ use bevy::{
 
 use super::resources::*;
 
-use super::components::InGameCamera;
-use super::components::Canvas;
-use super::components::OuterCamera;
-use super::components::GameControls;
+use super::components::*;
 
 pub fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     let canvas_size = Extent3d {
@@ -84,4 +81,15 @@ pub fn fit_canvas(
         let mut projection = projections.single_mut();
         projection.scale = 1. / h_scale.min(v_scale).round();
     }
+}
+
+pub fn initialize_game (
+    mut commands: Commands,
+) {
+    commands.spawn((
+        GlobalEnt,
+        EnemySpawningQueue {
+            queue: Vec::new(),
+        },
+    ));
 }

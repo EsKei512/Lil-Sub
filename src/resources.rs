@@ -1,3 +1,5 @@
+use std::array;
+
 use bevy::{
     prelude::*,
     render::{
@@ -18,3 +20,15 @@ pub const GAME_RES_Y: u32 = 270;
 // Layers for rendering. 
 pub const PIXEL_PERFECT_RENDERING  : RenderLayers = RenderLayers::layer(0);
 pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
+
+// Enemy IDs Enum
+#[derive(Copy, Clone, Debug)]
+pub enum EnemyIds {
+    Debug,
+    Goldfish,
+}
+#[derive(Debug)]
+pub struct EnemySpawningInfo {
+    pub origin: Vec2,
+    pub e_id: EnemyIds,
+}

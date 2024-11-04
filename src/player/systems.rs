@@ -1,5 +1,9 @@
-use bevy::math::VectorSpace;
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    reflect::TypePath,
+    render::render_resource::{AsBindGroup, ShaderRef},
+    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+};
 use rand::Rng;
 
 use crate::resources::*;
@@ -8,10 +12,26 @@ use crate::components::*;
 use super::components::*;
 use super::resources::*;
 
+// Shader Stuff
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+struct DamageFlash {
+    #[uniform(0)]
+    enabled: bool,
+    #[texture(1)]
+    #[sampler(2)]
+    texture: Image
+}
+impl Material2d for DamageFlash {
+    fn fragment_shader() -> ShaderRef {
+        "assets/shaders/enemy_flash.wgsl".into()
+    }
+}
+
 pub fn spawn_player(
     mut commands: Commands, 
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut materials: ResMut<Assets<DamageFlash>>,
 ) {
     let texture = asset_server.load("sprites/gameplay/player.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(22), 6, 1, None, None);
@@ -32,12 +52,13 @@ pub fn spawn_player(
             ..Default::default()
         },
         AnimationTools {
-            ticks: PLAYER_PROPELLER_TICK_LENGTH,
+            ticks_i: PLAYER_PROPELLER_TICK_LENGTH,
+            ..default()
         },
         Complex2dMovement {
-            soft_terminal_velocity: 0.75,
-            hard_terminal_velocity: 1.6,
-            acceleration: 4.0,
+            soft_terminal_velocity: 1.25,
+            hard_terminal_velocity: 2.5,
+            acceleration: 5.5,
             natural_deceleration: 6.25,
             current_velocity: Vec3::ZERO,
         },
@@ -108,13 +129,13 @@ pub fn run_player_logic(
         if ((movement_direction.y.abs() * 10.0).round() > 0.0) { // This block of code is bad and complex too
             p_physics.current_velocity.y = (p_physics.current_velocity.y + ((movement_direction.y * &p_physics.acceleration) * time.delta_seconds()) ).clamp(-p_physics.soft_terminal_velocity, p_physics.soft_terminal_velocity);    
             if p_transform.rotation.z.abs() < 0.3 {
-                p_transform.rotate_z((0.01 * (y_sign as f32)) * (time.delta_seconds() * 60.0)); // TODO: Fix bug where player gets stuck in direction if he turns too far
+                p_transform.rotate_z((0.0075 * (y_sign as f32)) * (time.delta_seconds() * 60.0)); // TODO: Fix bug where player gets stuck in direction if he turns too far
             }
         }
         else { // Vertical deceleration
             p_physics.current_velocity.y = (p_physics.current_velocity.y.abs() - (&p_physics.natural_deceleration * time.delta_seconds())).clamp(0.0, p_physics.soft_terminal_velocity) * (y_sign as f32);
             if ! (-(current_sprite_rotation / 2.0)).is_nan() {
-                p_transform.rotate_z( -(current_sprite_rotation / 20.0) );
+                p_transform.rotate_z( -(current_sprite_rotation / (12.5) * (time.delta_seconds() * 60.0)) );
             }
         }
 
@@ -127,16 +148,16 @@ pub fn run_player_logic(
         if normalized_vector.x.is_nan() { normalized_vector.x = 0.0 }
         if normalized_vector.y.is_nan() { normalized_vector.y = 0.0 }
 
-        p_transform.translation += p_physics.current_velocity.abs() * Vec3::new(normalized_vector.x, normalized_vector.y, 1.0); // Actually move the player
+        p_transform.translation += (p_physics.current_velocity.abs() * Vec3::new(normalized_vector.x, normalized_vector.y, 1.0)) * (time.delta_seconds() * 60.0); // Actually move the player
 
         // END OF PLAYER MOVEMENT CODE *******************************************************************************************************
 
         // PLAYER ANIMATION CODE *************************************************************************************************************
 
-        if a_tools.ticks <= 0.0 {
+        if a_tools.ticks_i <= 0.0 {
             if p_texture.index == 0 { p_texture.index = 1 }
             else if p_texture.index == 1 { p_texture.index = 0 }
-            a_tools.ticks = PLAYER_PROPELLER_TICK_LENGTH;
+            a_tools.ticks_i = PLAYER_PROPELLER_TICK_LENGTH;
         }
         else { a_tools.tick(time.delta_seconds()) }
 
@@ -159,7 +180,7 @@ pub fn run_player_logic(
                 Complex2dMovement {
                     soft_terminal_velocity: 5.0,
                     hard_terminal_velocity: 5.0,
-                    acceleration: 0.1,
+                    acceleration: 0.5,
                     natural_deceleration: 22.5,
                     current_velocity: Vec3::new(14.0, 0.0, 0.0),
                 },
@@ -172,10 +193,11 @@ pub fn run_player_logic(
                     size: Vec3::new(10.0, 6.0, 250.0),
                 },
                 PlayerBullet {
-                    float_horizontal_acceleration: rand::thread_rng().gen_range(-0.05..0.05),
+                    float_horizontal_acceleration: rand::thread_rng().gen_range(-0.25..0.25),
                 },
                 AnimationTools {
-                    ticks: PLAYER_BULLET_TICK_LENGTH,
+                    ticks_i: PLAYER_BULLET_TICK_LENGTH,
+                    ..default()
                 },
             ));
         }
@@ -209,7 +231,7 @@ pub fn run_player_bullet_logic (
     }
     else { // Bullet as a little bubble
         
-        b_transform.translation += b_physics.current_velocity; // Movement
+        b_transform.translation += b_physics.current_velocity * (time.delta_seconds() * 60.0); // Movement
 
         b_physics.current_velocity.y += b_physics.acceleration * time.delta_seconds(); //              Floating away |
         b_physics.current_velocity.x += bullet.float_horizontal_acceleration * time.delta_seconds();// Acceleration  |
@@ -224,9 +246,9 @@ pub fn run_player_bullet_logic (
 
         if !(b_texture.index >= 5) // Animation
         {
-            if a_tools.ticks <= 0.0 {
+            if a_tools.ticks_i <= 0.0 {
                 b_texture.index += 1;
-                a_tools.ticks = PLAYER_BULLET_TICK_LENGTH;
+                a_tools.ticks_i = PLAYER_BULLET_TICK_LENGTH;
             }
             else { a_tools.tick(time.delta_seconds()); }
         }
