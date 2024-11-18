@@ -69,7 +69,7 @@ pub fn spawn_enemy(
                 acceleration: 0.0,
                 natural_deceleration: 0.0,
                 current_velocity: Vec3::ZERO,
-            }
+            },
         )).id();
         
         match enemy_id {
@@ -84,7 +84,7 @@ pub fn spawn_enemy(
 pub fn universal_enemy_logic(
     mut enemy_query : Query<(Entity, &mut TextureAtlas, &mut Complex2dMovement, &mut Stats, &mut GameEnemy, &mut AnimationTools, &mut Transform, &mut EnGoldfish), (With<GameEnemy>, Without<Player>, Without<PlayerBullet>)>,
     player_query: Query<&Transform, (With<Player>, Without<GameEnemy>, Without<PlayerBullet>)>,
-    p_bullet_query: Query<(Entity, &Transform), (With<PlayerBullet>, Without<Player>, Without<GameEnemy>)>,
+    p_bullet_query: Query<(Entity, &Transform, &Collision), (With<PlayerBullet>, Without<Player>, Without<GameEnemy>)>,
     mut commands : Commands,
     time: Res<Time>,
 ) {
@@ -95,19 +95,15 @@ pub fn universal_enemy_logic(
 
         if e_stats.cur_hp <= 0
         {
-            println!("Lal");
             if let EnemyStates::Dead = enemy.current_state {
                 // DEATH CODE
             } else { enemy.current_state = EnemyStates::Dead }
         }
         else {
-            println!("We're about to do the query for the bullet n stuff");
-            for (b_entity, b_transform) in p_bullet_query.iter() { // Bullet Collision Thingy
-                println!("Boys, we got business!");
+            for (b_entity, b_transform, b_collision) in p_bullet_query.iter() { // Bullet Collision Thingy
+
                 let distance : f32 = Vec2::new(b_transform.translation.x, b_transform.translation.y).distance(Vec2::new(e_transform.translation.x, e_transform.translation.y));
-                println!("Distance: {}", distance);
-                if distance <= enemy.hitbox_size {
-                    println!("GREAT GOOGLY MOOGLY Hp: {}", e_stats.cur_hp);
+                if (distance <= enemy.hitbox_size) && (b_collision.enabled) {
                     e_stats.cur_hp -= 1;
                     commands.entity(b_entity).despawn();
                     if e_stats.cur_hp <= 0 {
@@ -312,7 +308,7 @@ pub fn goldfish_enemy_logic(
             if a_tools.ticks_iii > 0.0 {
                 a_tools.tick(time.delta_seconds());
                 e_transform.translation.x += ((enemy.origin.x - e_transform.translation.x) / (20.0)) * (time.delta_seconds() * 60.0);
-                e_transform.translation.y += ((enemy.origin.y - e_transform.translation.y) / (5.0)) * (time.delta_seconds() * 60.0);
+                e_transform.translation.y += ((enemy.origin.y - e_transform.translation.y) / (10.0)) * (time.delta_seconds() * 60.0);
             } else {
                 a_tools.ticks_i = 20.0;
                 a_tools.generic_counter_i = 3;
@@ -336,7 +332,7 @@ pub fn debug_wave_spawn(
 ) {
     for (mut spawining_queue) in global_query.iter_mut()
     {
-        spawining_queue.queue.push(EnemySpawningInfo{ origin: Vec2::new(100.0, 0.0), e_id: EnemyIds::Goldfish});
-        //for _i in 0..25 {spawining_queue.queue.push(EnemySpawningInfo {origin: Vec2::new(rand::thread_rng().gen_range(0.0..150.0), rand::thread_rng().gen_range(-100.0..100.0)),e_id: EnemyIds::Goldfish,});}
+        spawining_queue.queue.push(EnemySpawningInfo{ origin: Vec2::new(100.0, 0.0), e_id: EnemyIds::Debug});
+        for _i in 0..5000 {spawining_queue.queue.push(EnemySpawningInfo {origin: Vec2::new(rand::thread_rng().gen_range(0.0..150.0), rand::thread_rng().gen_range(-100.0..100.0)),e_id: EnemyIds::Goldfish,});}
     }
 }

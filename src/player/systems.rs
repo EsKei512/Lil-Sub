@@ -13,25 +13,26 @@ use super::components::*;
 use super::resources::*;
 
 // Shader Stuff
-#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-struct DamageFlash {
-    #[uniform(0)]
-    enabled: bool,
-    #[texture(1)]
-    #[sampler(2)]
-    texture: Image
-}
-impl Material2d for DamageFlash {
-    fn fragment_shader() -> ShaderRef {
-        "assets/shaders/enemy_flash.wgsl".into()
-    }
-}
+// #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+// struct DamageFlash {
+    // #[uniform(0)]
+    // enabled: bool,
+    // #[texture(1)]
+    // #[sampler(2)]
+    // texture: Image
+// }
+
+//impl Material2d for DamageFlash {
+    //fn fragment_shader() -> ShaderRef {
+        //"assets/shaders/enemy_flash.wgsl".into()
+    //}
+//}
 
 pub fn spawn_player(
     mut commands: Commands, 
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut materials: ResMut<Assets<DamageFlash>>,
+    //mut materials: ResMut<Assets<DamageFlash>>,
 ) {
     let texture = asset_server.load("sprites/gameplay/player.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(22), 6, 1, None, None);
