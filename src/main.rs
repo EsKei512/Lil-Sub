@@ -22,6 +22,8 @@ pub mod player;
 use player::PlayerPlugin;
 pub mod enemy;
 use enemy::EnemyPlugin;
+pub mod particles;
+use particles::ParticlesPlugin;
 
 fn main() {
     App::new()                                // Plugins
@@ -29,6 +31,7 @@ fn main() {
             DefaultPlugins.set(ImagePlugin::default_nearest()),
             PlayerPlugin,
             EnemyPlugin,
+            ParticlesPlugin,
         ))
 
         .insert_resource(Msaa::Off)

@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
-pub enum ParticleIds {
-    Smoke,
+pub enum ParticleBehaviorIDs {
+    Burst,
+}
+pub enum ParticleSpawnerShapes {
+    Square,
+    Circle,
 }

@@ -1,5 +1,7 @@
 use std::array;
 
+use::particles::ParticleSpawner;
+
 use bevy::{
     prelude::*,
     render::{
@@ -29,6 +31,10 @@ pub enum EnemyIds {
 }
 #[derive(Debug)]
 pub struct EnemySpawningInfo {
+    pub origin: Vec2,
+    pub e_id: EnemyIds,
+}
+pub struct ParticleSpawningInfo {
     pub origin: Vec2,
     pub e_id: EnemyIds,
 }
