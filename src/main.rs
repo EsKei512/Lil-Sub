@@ -10,6 +10,7 @@ use bevy::{
     sprite::MaterialMesh2dBundle,
     window::WindowResized,
 };
+use bevy_kira_audio::prelude::*;
 
 pub mod components;
 use components::*;
@@ -29,6 +30,7 @@ fn main() {
     App::new()                                // Plugins
         .add_plugins((                             
             DefaultPlugins.set(ImagePlugin::default_nearest()),
+            AudioPlugin,
             PlayerPlugin,
             EnemyPlugin,
             ParticlesPlugin,
@@ -38,7 +40,7 @@ fn main() {
 
         .add_systems(Startup, ( // Startup Systems
             initialize_game,
-            setup_camera,
+            setup_camera.after(initialize_game),
         ))
 
         .add_systems(Update, (  // Update systems

@@ -45,7 +45,7 @@ impl Default for GameControls {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Complex2dMovement {
     pub soft_terminal_velocity : f32, // The entity with this cannot NATURALLY go faster than this, but can be pushed to go faster (I.e., with an explosion)
     pub hard_terminal_velocity : f32, // The entity with this component CANNOT go faster than this
@@ -130,3 +130,74 @@ pub struct EnemySpawningQueue {
 
 #[derive(Component)]
 pub struct GlobalEnt;
+
+#[derive(Component)]
+pub struct AudioSettings {
+    pub master_volume  : f32,
+    pub sfx_volume     : f32,
+    pub music_volume   : f32,
+    pub sterio_strength: f32,
+    pub sterio_enabled : bool,
+}
+impl Default for AudioSettings {
+    fn default() -> AudioSettings {
+        AudioSettings {
+            master_volume: 1.0,
+            sfx_volume: 100.0,
+            music_volume: 0.8,
+            sterio_strength: 100.0,
+            sterio_enabled: true,
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct GameplaySettings {
+
+}
+impl Default for GameplaySettings {
+    fn default() -> GameplaySettings {
+        GameplaySettings {
+
+        }
+    }
+}
+#[derive(Component)]
+pub struct AccessabilitySettings {
+    pub screen_shake_multiplier : f32,
+    pub game_timescale          : f32,
+    pub visible_hitboxes       : bool,
+    pub generous_hitboxes      : bool, // Hitboxes favor the player more
+    pub reduce_flashing_lights : bool,
+    pub pixelization_disabled  : bool, // Pixel artest sadness
+}
+impl Default for AccessabilitySettings {
+    fn default() -> AccessabilitySettings {
+        AccessabilitySettings {
+            screen_shake_multiplier: 1.0,
+            game_timescale: 1.0,
+            visible_hitboxes: false,
+            generous_hitboxes: false,
+            reduce_flashing_lights: false,
+            pixelization_disabled: false,
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct GameSettings {
+    pub controls : GameControls,
+    pub gameplay : GameplaySettings,
+    pub audio    : AudioSettings,
+    pub accessability : AccessabilitySettings,
+}
+impl Default for GameSettings {
+    fn default() -> Self {
+        GameSettings {
+            controls: GameControls{..default()},
+            gameplay: GameplaySettings{..default()},
+            audio   : AudioSettings{..default()},
+            accessability: AccessabilitySettings{..default()},
+        }
+    }
+}

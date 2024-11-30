@@ -1,6 +1,6 @@
 use std::array;
 
-use::particles::ParticleSpawner;
+use crate::particles::components::ParticleSpawner;
 
 use bevy::{
     prelude::*,
@@ -23,6 +23,8 @@ pub const GAME_RES_Y: u32 = 270;
 pub const PIXEL_PERFECT_RENDERING  : RenderLayers = RenderLayers::layer(0);
 pub const PIXEL_IMPERFECT_RENDERING: RenderLayers = RenderLayers::layer(1);
 
+pub const ENEMY_HURT_TICKS : f32 = 2.5;
+
 // Enemy IDs Enum
 #[derive(Copy, Clone, Debug)]
 pub enum EnemyIds {
@@ -31,10 +33,6 @@ pub enum EnemyIds {
 }
 #[derive(Debug)]
 pub struct EnemySpawningInfo {
-    pub origin: Vec2,
-    pub e_id: EnemyIds,
-}
-pub struct ParticleSpawningInfo {
     pub origin: Vec2,
     pub e_id: EnemyIds,
 }

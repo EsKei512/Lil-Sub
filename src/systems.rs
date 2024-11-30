@@ -91,5 +91,8 @@ pub fn initialize_game (
         EnemySpawningQueue {
             queue: Vec::new(),
         },
+        GameSettings {
+            ..default()
+        }
     ));
 }

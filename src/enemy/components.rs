@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::AudioSource;
 use crate::resources::EnemyIds;
 
 use super::resources::EnemyStates;
@@ -10,6 +11,10 @@ pub struct GameEnemy {
     pub current_state : EnemyStates,
     pub state_ticks   : f32,
     pub hitbox_size   : f32,
+    pub hurt_ticks    : f32,
+    pub enabled       : bool,
+    pub target_color  : Color,
+    pub target_scale  : Vec2,
 }
 impl GameEnemy {
     pub fn tick(&mut self, delta_time: f32) {
@@ -43,4 +48,10 @@ impl Default for EnGoldfish {
             calculations_finished: false,
         }
     }
+}
+
+#[derive(Component)]
+pub struct EnemySounds {
+    pub hurt_sound  : Handle<AudioSource>,
+    pub death_sound : Handle<AudioSource>,
 }
