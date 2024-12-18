@@ -1,7 +1,3 @@
-use std::array;
-
-use crate::particles::components::ParticleSpawner;
-
 use bevy::{
     prelude::*,
     render::{

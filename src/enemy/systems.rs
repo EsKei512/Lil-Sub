@@ -17,14 +17,18 @@ use crate::components::*;
 use super::components::*;
 use super::resources::*;
 
+trait FetchUniqueId {
+    fn fetch_unique_id(&mut self) -> u64;
+}
+
 
 pub fn spawn_enemy(
     mut commands: Commands, 
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut global_query: Query<(&mut EnemySpawningQueue, &GameSettings), With<GlobalEnt>>,
+    mut global_query: Query<(&mut EnemySpawningQueue, &mut GlobalEnt, &GameSettings), With<GlobalEnt>>,
 ) {
-    for (mut e_spawining_queue, game_settings) in global_query.iter_mut()
+    for (mut e_spawining_queue, mut unique_id_handler, game_settings) in global_query.iter_mut()
     {
 
     while e_spawining_queue.queue.len() > 0 {

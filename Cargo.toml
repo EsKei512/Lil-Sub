@@ -32,6 +32,7 @@ bevy = { version = "0.14", default-features = false, features = [
 ] }
 rand = "0.8.5"
 bevy_kira_audio = { version = "0.20", features = ["ogg", "wav"] }
+serde_json = "1.0"
 
 [profile.dev.package."*"]
 opt-level = 3

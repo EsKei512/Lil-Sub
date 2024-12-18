@@ -1,0 +1,44 @@
+{
+
+    "commandq" : "COMMAND?",
+
+    "game_commands" : "Game-Unique Commands",
+    "esbv_commands" : "EsBevy Commands",
+    "about" : "About",
+    "close" : "Close",
+    "quit_software" : "Quit Software",
+    "quit_ays" : "Quit ARE YOU SURE?",
+    "yes" : "yes", 
+    "no"  : "no" ,
+     
+
+
+
+
+
+    "game_commands_title" : "G COMMANDS",
+     
+
+
+
+
+
+    "esbv_commands_title" : "ESBV COMMANDS",
+
+    "sfx_player" : "SFX Player",
+    "sfx_player_title" : "SFX PLAYER",
+    "sfx_settings_panning" : "PANNING",
+    "sfx_settings_volume"  : "VOLUME",
+    "sfx_play" : "PLAY",
+    "back" : "BACK",
+
+    "particles_player" : "Particles",
+
+    "sprite_viewer" : "Sprite Viewer",
+    "sprite_viewer_title" : "SPRITE VIEWER",
+    "sprite_z_level" : "Z Level",
+
+
+    "about_text" : "             EsBevy v0.1\n             2024  EsKei\n           Debug Menu v0.1\nIF you found this, that means I forgot\nto patch it out... my bad!\nIn the meantime, do whatever you want,\nidc lol."
+ 
+}

@@ -128,6 +128,8 @@ pub struct EnemySpawningQueue {
     pub queue: Vec<EnemySpawningInfo>,
 }
 
+
+
 #[derive(Component)]
 pub struct GlobalEnt;
 
@@ -201,3 +203,17 @@ impl Default for GameSettings {
         }
     }
 }
+
+#[derive(Component)]
+pub struct UniqueId {
+    pub unique_id : u64,
+}
+
+#[derive(Component)]
+pub struct PlayerStats {
+    pub hp : i32,
+    pub money : u32
+}
+
+#[derive(Component)]
+pub struct DebugBackground;

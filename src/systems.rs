@@ -12,7 +12,15 @@ use super::resources::*;
 
 use super::components::*;
 
-pub fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
+use serde_json::Value;
+
+use std::fs::{self, read_to_string, File};
+use std::io::{self, Read};
+
+pub fn setup_camera (
+    mut commands: Commands, 
+    mut images: ResMut<Assets<Image>>,
+) {
     let canvas_size = Extent3d {
         width: GAME_RES_X,
         height: GAME_RES_Y,
@@ -71,7 +79,7 @@ pub fn setup_camera(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     commands.spawn((Camera2dBundle::default(), OuterCamera, PIXEL_IMPERFECT_RENDERING));
 }
 
-pub fn fit_canvas(
+pub fn fit_canvas( // TODO: Fix the scale at certain resolutions
     mut resize_events: EventReader<WindowResized>,
     mut projections: Query<&mut OrthographicProjection, With<OuterCamera>>,
 ) {
@@ -85,6 +93,7 @@ pub fn fit_canvas(
 
 pub fn initialize_game (
     mut commands: Commands,
+    asset_server : Res<AssetServer>,
 ) {
     commands.spawn((
         GlobalEnt,
@@ -93,6 +102,33 @@ pub fn initialize_game (
         },
         GameSettings {
             ..default()
-        }
+        },
+        PlayerStats {
+            hp: 5,
+            money: 0,
+        },
     ));
+
+    // Debug Background
+    commands.spawn((
+        SpriteBundle{
+            texture : asset_server.load("sprites/testing/manbg.png"),
+            transform : Transform::from_xyz(0.0, 0.0, -999.0),
+            ..default()
+        },
+        DebugBackground,
+    ));
+}
+
+pub fn read_file(path: &str) -> Result<String, io::Error> {
+    fs::read_to_string(path)
+}
+
+pub fn parse_json(path: &str) -> Value {
+    match read_to_string(path) {
+        Ok(jval) => {
+            serde_json::from_str(&jval).unwrap()
+        },
+        Err(error) => panic!("Error. Invalid file: {:?}", error),
+    }
 }

@@ -19,12 +19,16 @@ use resources::*;
 pub mod systems;
 use systems::*;
 
+pub mod esbv_debug_menu;
+use esbv_debug_menu::EsBvDebugPlugin;
 pub mod player;
 use player::PlayerPlugin;
 pub mod enemy;
 use enemy::EnemyPlugin;
 pub mod particles;
 use particles::ParticlesPlugin;
+pub mod hud;
+use hud::HudPlugin;
 
 fn main() {
     App::new()                                // Plugins
@@ -34,9 +38,13 @@ fn main() {
             PlayerPlugin,
             EnemyPlugin,
             ParticlesPlugin,
+            EsBvDebugPlugin,
+            HudPlugin,
         ))
 
         .insert_resource(Msaa::Off)
+
+        .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
 
         .add_systems(Startup, ( // Startup Systems
             initialize_game,

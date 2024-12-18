@@ -5,17 +5,16 @@ pub mod resources;
 pub mod systems;
 use systems::*;
 
-pub struct HudPlugin;
+pub struct EsBvDebugPlugin;
 
-impl Plugin for HudPlugin {
+impl Plugin for EsBvDebugPlugin {
     fn build(&self, app: &mut App) { app
         .add_systems(Startup, (
-            spawn_ui,
+            spawn_debug_menu
         ))
         .add_systems(Update, (
-            universal_ui_logic,
-            hp_ui_logic,
-            money_ui_logic,
+            debug_menu_logic,
+            debug_menu_window_logic,
         ));
     }
 }
