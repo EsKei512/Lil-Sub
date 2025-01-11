@@ -29,6 +29,8 @@ pub mod particles;
 use particles::ParticlesPlugin;
 pub mod hud;
 use hud::HudPlugin;
+pub mod collectables;
+use collectables::CollectablesPlugin;
 
 fn main() {
     App::new()                                // Plugins
@@ -40,6 +42,7 @@ fn main() {
             ParticlesPlugin,
             EsBvDebugPlugin,
             HudPlugin,
+            CollectablesPlugin,
         ))
 
         .insert_resource(Msaa::Off)

@@ -23,14 +23,14 @@ pub struct DebugTextOrigin {
     pub label     : String, // ------ The text the string is to display
     pub font_data : Value, // ------- The font data from a json file
     pub font_file : Handle<Image>, // The font file used
-    pub text_id   : u64, // Unique ID to help with parent-child relationships
+    pub text_id   : u32, // Unique ID to help with parent-child relationships
     pub origin    : Vec3,
-    pub index     : i32, // The line the string is on. Allows highlighting when hovered.
+    pub index     : i32, // The button id for the text for highlighting. Set to -1 for unhilightable text
 }
 #[derive(Component)]
 pub struct DebugTextCharacter {
     pub sprite_frame : i32,
     pub origin  : Vec3,
-    pub index   : i32,
-    pub text_id : u64,
+    pub index   : i32, // The button id for the text for highlighting. Set to -1 for unhilightable text
+    pub text_id : u32,
 }

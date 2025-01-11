@@ -341,8 +341,8 @@ pub fn goldfish_enemy_logic(
 
                     e_velocity.current_velocity.x = 25.0;
 
-                    let diff = e_transform.translation - p_transform.translation; // Shamelessly stole this code from stack overflow my brain is dead
-                    let angle = diff.y.atan2(diff.x);                              // https://stackoverflow.com/questions/65370874/bevy-rotation-in-2d
+                    let diff = e_transform.translation - p_transform.translation; // | Shamelessly stole this code from stack overflow my brain is dead
+                    let angle = diff.y.atan2(diff.x); // <----------------------------| https://stackoverflow.com/questions/65370874/bevy-rotation-in-2d
 
                     extra.goldfish_angle_offset = angle;
 

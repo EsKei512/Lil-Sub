@@ -15,7 +15,7 @@ pub fn spawn_ui (
     let ui_entity : Entity = commands.spawn((
         SpriteBundle {
             texture : asset_server.load("sprites/gameplay/ui/hud/health_and_money.png"),
-            transform : Transform::from_xyz(34.0 - (GAME_RES_X as f32 / 2.0), -12.0 + (GAME_RES_Y as f32 / 2.0), 25.0),
+            transform : Transform::from_xyz(36.0 - (GAME_RES_X as f32 / 2.0), -14.0 + (GAME_RES_Y as f32 / 2.0), 25.0),
             ..default()
         },
         GameUi {
@@ -45,7 +45,7 @@ pub fn spawn_ui (
 
         commands.spawn((
             SpriteBundle {
-                transform : Transform::from_xyz(13.0 - (GAME_RES_X as f32 / 2.0) + (5.0 * (i + 1) as f32), -17.0 + (GAME_RES_Y as f32 / 2.0), 800.0),
+                transform : Transform::from_xyz(15.0 - (GAME_RES_X as f32 / 2.0) + (5.0 * (i + 1) as f32), -19.0 + (GAME_RES_Y as f32 / 2.0), 800.0),
                 texture : asset_server.load("sprites/gameplay/ui/hud/money_text.png"),
                 ..default()
             },
